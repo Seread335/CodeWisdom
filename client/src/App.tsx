@@ -32,7 +32,7 @@ function Router() {
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/categories/:category" component={CategoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
-      <ProtectedRoute path="/admin" component={AdminPage} />
+      <ProtectedRoute path="/admin" component={AdminPage} adminOnly={true} />
       <Route component={NotFound} />
     </Switch>
   );
