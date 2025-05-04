@@ -17,6 +17,7 @@ import ProfilePage from "@/pages/profile-page";
 import AdminPage from "@/pages/admin-page";
 import Contact from "@/pages/Contact";
 import Team from "@/pages/Team";
+import CodePracticePage from "@/pages/code-practice-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 
@@ -37,6 +38,7 @@ function Router() {
       <ProtectedRoute path="/admin" component={AdminPage} adminOnly={true} />
       <ProtectedRoute path="/contact" component={Contact} />
       <ProtectedRoute path="/team" component={Team} />
+      <ProtectedRoute path="/code-practice" component={CodePracticePage} />
       <Route component={NotFound} />
     </Switch>
   );
