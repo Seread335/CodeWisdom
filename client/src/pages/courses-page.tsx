@@ -15,6 +15,7 @@ export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedLevel, setSelectedLevel] = useState("all");
+  const { user } = useAuth();
   
   const { data: courses, isLoading } = useQuery({
     queryKey: ["/api/courses", selectedCategory, selectedLevel, searchQuery],
@@ -65,6 +66,29 @@ export default function CoursesPage() {
                   selectedLevel={selectedLevel}
                   setSelectedLevel={setSelectedLevel}
                 />
+                
+                {user && user.role === "admin" && (
+                  <div className="mt-6 bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h3 className="text-lg font-medium text-blue-800 mb-2">Quản lý khóa học</h3>
+                    <p className="text-sm text-blue-600 mb-3">
+                      Bạn có thể tải lên hoặc quản lý các khóa học với quyền admin
+                    </p>
+                    <div className="space-y-2">
+                      <Link href="/admin?tab=courses" className="w-full">
+                        <Button className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center">
+                          <PlusCircle className="h-4 w-4 mr-2" />
+                          Tạo khóa học mới
+                        </Button>
+                      </Link>
+                      <Link href="/admin" className="w-full">
+                        <Button variant="outline" className="w-full flex items-center justify-center">
+                          <Upload className="h-4 w-4 mr-2" />
+                          Quản lý khóa học
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
               </div>
               
               <div className="lg:col-span-3">
