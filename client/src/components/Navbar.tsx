@@ -90,6 +90,14 @@ export default function Navbar() {
                   <FaUserCircle className="text-xl" />
                   <span>{user.displayName || user.username}</span>
                 </Link>
+                {user.role === "admin" && (
+                  <Link 
+                    href="/admin" 
+                    className={`${isActive('/admin') ? 'text-primary' : 'text-dark'} hover:text-primary font-medium transition`}
+                  >
+                    Quản trị
+                  </Link>
+                )}
                 <button 
                   onClick={logout} 
                   className="text-red-500 hover:text-red-600 font-medium transition"
@@ -167,6 +175,15 @@ export default function Navbar() {
                     <FaUserCircle className="text-xl" />
                     <span>{user.displayName || user.username}</span>
                   </Link>
+                  {user.role === "admin" && (
+                    <Link 
+                      href="/admin" 
+                      onClick={closeMobileMenu}
+                      className={`${isActive('/admin') ? 'text-primary' : 'text-dark'} hover:text-primary font-medium transition`}
+                    >
+                      Quản trị
+                    </Link>
+                  )}
                   <button 
                     onClick={() => {
                       logout();
