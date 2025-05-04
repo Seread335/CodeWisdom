@@ -1,4 +1,4 @@
-import type { Express } from "express";
+import type { Express, Request, Response, NextFunction } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
@@ -17,8 +17,50 @@ import {
   badges,
   achievements,
   userBadges,
-  userAchievements
+  userAchievements,
+  Course,
+  courses
 } from "@shared/schema";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// Tạo thư mục uploads nếu chưa có
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) {
+  fs.mkdirSync(uploadsDir, { recursive: true });
+}
+
+// Cấu hình multer để lưu trữ tệp tải lên
+const uploadStorage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, uploadsDir);
+  },
+  filename: function (req, file, cb) {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    const ext = path.extname(file.originalname);
+    cb(null, file.fieldname + '-' + uniqueSuffix + ext);
+  }
+});
+
+const upload = multer({ 
+  storage: uploadStorage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Giới hạn kích thước tệp 10MB
+  fileFilter: (req, file, cb) => {
+    // Kiểm tra loại tệp
+    if (file.mimetype.startsWith('image/') || 
+        file.mimetype === 'application/pdf' || 
+        file.mimetype === 'application/msword' || 
+        file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        file.mimetype === 'text/plain' ||
+        file.mimetype === 'application/zip') {
+      cb(null, true);
+    } else {
+      cb(null, false);
+      return cb(new Error('Chỉ chấp nhận file hình ảnh, PDF, Word, text và ZIP!'));
+    }
+  }
+});
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -556,6 +598,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin: Middleware kiểm tra quyền admin
+  const requireAdmin = (req: Request, res: Response, next: NextFunction) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    
+    if (req.user.role !== 'admin') {
+      return res.status(403).json({ message: "Forbidden: Admin access required" });
+    }
+    
+    next();
+  };
+
+  // Admin: Upload khóa học
+  app.post("/api/admin/courses/upload", requireAdmin, upload.single('file'), async (req, res, next) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      const { title, description, price, originalPrice, level, categoryIds, instructorId } = req.body;
+      
+      if (!title || !description || !level || !categoryIds) {
+        return res.status(400).json({ message: "Missing required fields" });
+      }
+
+      // Tạo khóa học mới
+      const course = await storage.createCourse({
+        title,
+        description,
+        level: level as "beginner" | "intermediate" | "advanced",
+        price: parseFloat(price) || 0,
+        originalPrice: parseFloat(originalPrice) || 0,
+        imageUrl: req.file.path, // Đường dẫn đến file ảnh
+        instructorId: instructorId ? parseInt(instructorId) : null,
+        enrollmentCount: 0,
+        rating: 0,
+        videoDuration: "0h 0m",
+        lessonsCount: 0,
+        resourcesCount: 0,
+        exercisesCount: 0,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+
+      // Thêm các danh mục cho khóa học
+      const categoryIdsList = Array.isArray(categoryIds) 
+        ? categoryIds 
+        : categoryIds.split(',').map(id => parseInt(id.trim()));
+
+      for (const categoryId of categoryIdsList) {
+        await db.insert(courseCategories).values({
+          courseId: course.id,
+          categoryId: parseInt(categoryId.toString()),
+        });
+      }
+
+      res.status(201).json(course);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Get all courses
+  app.get("/api/admin/courses", requireAdmin, async (req, res, next) => {
+    try {
+      const courses = await storage.getCourses();
+      res.json(courses);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Xóa khóa học
+  app.delete("/api/admin/courses/:id", requireAdmin, async (req, res, next) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const deleted = await storage.deleteCourse(courseId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      res.json({ message: "Course deleted successfully" });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Admin: Cập nhật khóa học
+  app.patch("/api/admin/courses/:id", requireAdmin, upload.single('file'), async (req, res, next) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const { title, description, price, originalPrice, level } = req.body;
+      
+      const updates: Partial<Course> = {};
+      
+      if (title) updates.title = title;
+      if (description) updates.description = description;
+      if (price) updates.price = parseFloat(price);
+      if (originalPrice) updates.originalPrice = parseFloat(originalPrice);
+      if (level) updates.level = level as "beginner" | "intermediate" | "advanced";
+      if (req.file) updates.imageUrl = req.file.path;
+      
+      updates.updatedAt = new Date();
+      
+      const updatedCourse = await storage.updateCourse(courseId, updates);
+      
+      if (!updatedCourse) {
+        return res.status(404).json({ message: "Course not found" });
+      }
+      
+      res.json(updatedCourse);
+    } catch (error) {
+      next(error);
+    }
+  });
+  
   // Badges
   app.get("/api/user/badges", async (req, res, next) => {
     try {
