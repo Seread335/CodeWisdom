@@ -3,7 +3,8 @@ import connectPg from "connect-pg-simple";
 import session from "express-session";
 import { 
   eq, and, desc, asc, like,
-  isNull, isNotNull, inArray, 
+  isNull, isNotNull, inArray,
+  sql,
 } from "drizzle-orm";
 import { 
   users, User, InsertUser,
@@ -235,13 +236,16 @@ class DatabaseStorage implements IStorage {
     let query = db.select().from(courses);
     
     if (enrolledCourseIds.length > 0) {
-      // Sử dụng SQL.raw để tạo điều kiện NOT IN thay vì dùng inArray().not() phương thức đã bị lỗi
+      // Sử dụng NOT IN condition
       query = query.where(
         and(
           isNotNull(courses.id),
-          notInArray(courses.id, enrolledCourseIds)
+          sql`${courses.id} NOT IN (${enrolledCourseIds.join(',')})`
         )
       );
+    } else {
+      // Nếu không có khóa học đã đăng ký, chỉ cần lấy tất cả khóa học
+      query = query.where(isNotNull(courses.id));
     }
     
     query = query.limit(limit).orderBy(desc(courses.createdAt));
