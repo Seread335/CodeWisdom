@@ -24,13 +24,19 @@ export default function ProfilePage() {
 
   const { data: userBadges, isLoading: isBadgesLoading } = useQuery({
     queryKey: ["/api/user/badges"],
-    queryFn: () => apiRequest("/api/user/badges"),
+    queryFn: async () => {
+      const response = await apiRequest("/api/user/badges");
+      return await response.json();
+    },
     enabled: !!user,
   });
 
   const { data: userAchievements, isLoading: isAchievementsLoading } = useQuery({
     queryKey: ["/api/user/achievements"],
-    queryFn: () => apiRequest("/api/user/achievements"),
+    queryFn: async () => {
+      const response = await apiRequest("/api/user/achievements");
+      return await response.json();
+    },
     enabled: !!user,
   });
 

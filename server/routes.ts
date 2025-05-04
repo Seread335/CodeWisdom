@@ -556,6 +556,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Badges
+  app.get("/api/user/badges", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const badges = await storage.getUserBadges(req.user.id);
+      res.json(badges);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Achievements
+  app.get("/api/user/achievements", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+      
+      const achievements = await storage.getUserAchievements(req.user.id);
+      res.json(achievements);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
