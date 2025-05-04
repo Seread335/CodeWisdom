@@ -437,39 +437,89 @@ export default function AdminPage() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="courseImageFile">Hình ảnh khóa học</Label>
-                        <Input
-                          id="courseImageFile"
-                          type="file"
-                          accept="image/*"
-                          onChange={(e) => {
-                            const files = e.target.files;
-                            if (files && files.length > 0) {
-                              form.setValue("courseImageFile", files[0]);
-                            }
-                          }}
-                        />
+                        <Label htmlFor="courseImageFile">Hình ảnh bìa khóa học</Label>
+                        <div className="grid grid-cols-1 gap-2">
+                          <Input
+                            id="courseImageFile"
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              const files = e.target.files;
+                              if (files && files.length > 0) {
+                                form.setValue("courseImageFile", files[0]);
+                              }
+                            }}
+                            className="mb-2"
+                          />
+                          <div className="relative h-32 border rounded-md">
+                            {form.watch("courseImageFile") ? (
+                              <img 
+                                src={form.watch("courseImageFile") ? URL.createObjectURL(form.watch("courseImageFile") as File) : ""}
+                                alt="Preview"
+                                className="h-full w-full object-contain p-2 rounded-md"
+                              />
+                            ) : (
+                              <div className="flex items-center justify-center h-full">
+                                <p className="text-gray-400 text-sm">Xem trước hình ảnh</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
                         {form.formState.errors.courseImageFile && (
                           <p className="text-sm text-red-500">{form.formState.errors.courseImageFile.message}</p>
                         )}
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="courseContentFile">Nội dung khóa học (PDF, ZIP, Word)</Label>
-                        <Input
-                          id="courseContentFile"
-                          type="file"
-                          accept=".pdf,.zip,.doc,.docx,.txt"
-                          onChange={(e) => {
-                            const files = e.target.files;
-                            if (files && files.length > 0) {
-                              form.setValue("courseContentFile", files[0]);
-                            }
-                          }}
-                        />
-                        <p className="text-xs text-gray-500">
-                          Tải lên file chứa nội dung khóa học. Hệ thống sẽ tự động phân tích và phân loại nội dung.
-                        </p>
+                        <Label htmlFor="courseContentFile">Nội dung khóa học (TXT, JSON hoặc Markdown)</Label>
+                        <div className="grid grid-cols-1 gap-2">
+                          <Input
+                            id="courseContentFile"
+                            type="file"
+                            accept=".txt,.json,.md,.markdown"
+                            onChange={(e) => {
+                              const files = e.target.files;
+                              if (files && files.length > 0) {
+                                form.setValue("courseContentFile", files[0]);
+                                
+                                // Hiển thị tên file đã chọn
+                                const fileNameElement = document.getElementById('selectedFileName');
+                                if (fileNameElement) {
+                                  fileNameElement.textContent = files[0].name;
+                                }
+                              }
+                            }}
+                          />
+                          <div className="flex mt-1">
+                            <div className="bg-blue-50 text-blue-700 px-3 py-1 rounded-md text-xs">
+                              <span id="selectedFileName">Chưa chọn tệp</span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="bg-amber-50 border border-amber-200 rounded-md p-3 text-amber-800 text-xs space-y-2">
+                          <p className="font-medium">Hướng dẫn định dạng tệp nội dung:</p>
+                          <p>1. <strong>Tệp TXT</strong>: Sử dụng # để đánh dấu tiêu đề mô-đun, ## để đánh dấu tiêu đề bài học</p>
+                          <p>2. <strong>Tệp JSON</strong>: Cấu trúc mảng với các mô-đun và bài học (xem ví dụ bên dưới)</p>
+                          <details className="cursor-pointer">
+                            <summary className="font-medium">Xem ví dụ định dạng JSON</summary>
+                            <pre className="mt-1 overflow-auto text-xs p-2 bg-gray-800 text-gray-200 rounded-md">
+                              {JSON.stringify([
+                                {
+                                  title: "Tên module 1",
+                                  description: "Mô tả module 1",
+                                  lessons: [
+                                    {
+                                      title: "Tên bài học 1",
+                                      content: "Nội dung bài học 1...",
+                                      type: "text",
+                                      duration: 30
+                                    }
+                                  ]
+                                }
+                              ], null, 2)}
+                            </pre>
+                          </details>
+                        </div>
                         {form.formState.errors.courseContentFile && (
                           <p className="text-sm text-red-500">{form.formState.errors.courseContentFile.message}</p>
                         )}
