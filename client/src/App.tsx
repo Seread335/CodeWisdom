@@ -14,6 +14,7 @@ import SpecializationPage from "@/pages/specialization-page";
 import SettingsPage from "@/pages/settings-page";
 import CategoryPage from "@/pages/category-page";
 import { ProtectedRoute } from "./lib/protected-route";
+import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
@@ -36,8 +37,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <Router />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }

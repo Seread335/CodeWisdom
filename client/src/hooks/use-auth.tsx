@@ -7,6 +7,7 @@ import {
 import { insertUserSchema, User as SelectUser, InsertUser } from "@shared/schema";
 import { getQueryFn, apiRequest, queryClient } from "../lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 type LoginData = Pick<InsertUser, "username" | "password">;
 
@@ -24,6 +25,7 @@ const AuthContextImpl = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { toast } = useToast();
+  const [, navigate] = useLocation();
   const {
     data: user,
     error,
@@ -46,6 +48,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Đăng nhập thành công",
         description: `Chào mừng trở lại, ${user.username}!`,
       });
+      // Chuyển hướng người dùng đến trang chủ sau khi đăng nhập thành công
+      navigate("/");
     },
     onError: (error: Error) => {
       toast({
