@@ -2,6 +2,23 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth } from "./auth";
+import { db } from "@db";
+import { 
+  eq, and, desc, asc, 
+  like, inArray
+} from "drizzle-orm";
+import { 
+  categories,
+  courseCategories,
+  instructors,
+  modules,
+  progress,
+  pathCourses,
+  badges,
+  achievements,
+  userBadges,
+  userAchievements
+} from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Set up authentication routes
@@ -329,6 +346,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Badges and Achievements
+  app.get("/api/badges", async (req, res, next) => {
+    try {
+      const badges = await storage.getBadges();
+      res.json(badges);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/user/badges", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userBadges = await storage.getUserBadges(req.user.id);
+      res.json(userBadges);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/achievements", async (req, res, next) => {
+    try {
+      const achievements = await storage.getAchievements();
+      res.json(achievements);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/user/achievements", async (req, res, next) => {
+    try {
+      if (!req.isAuthenticated()) {
+        return res.status(401).json({ message: "Unauthorized" });
+      }
+
+      const userAchievements = await storage.getUserAchievements(req.user.id);
+      res.json(userAchievements);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // When marking a lesson as complete, check if any achievements should be updated
   app.post("/api/lessons/:id/complete", async (req, res, next) => {
     try {
       if (!req.isAuthenticated()) {
@@ -343,9 +406,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Mark lesson as complete
-      const progress = await storage.markLessonComplete(req.user.id, lessonId);
+      const progressResult = await storage.markLessonComplete(req.user.id, lessonId);
       
-      res.status(200).json({ success: true, progress });
+      // Get course details to update achievements
+      try {
+        // Get the module to find course
+        const moduleQuery = await db
+          .select()
+          .from(modules)
+          .where(eq(modules.id, lesson.moduleId))
+          .limit(1);
+        
+        if (moduleQuery.length > 0) {
+          const courseId = moduleQuery[0].courseId;
+          
+          // Calculate course progress
+          const courseProgress = await storage.calculateCourseProgress(req.user.id, courseId);
+          
+          // Check if course is completed (100% progress)
+          if (courseProgress === 100) {
+            // Find course completion achievements
+            const allAchievements = await storage.getAchievements();
+            const courseCompletionAchievements = allAchievements.filter(a => 
+              a.type === "course_completion"
+            );
+            
+            // Update achievement progress
+            for (const achievement of courseCompletionAchievements) {
+              await storage.updateUserAchievementProgress(
+                req.user.id, 
+                achievement.id, 
+                1
+              );
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Error updating achievements:", e);
+        // Don't fail the request if achievement update fails
+      }
+      
+      res.status(200).json({ success: true, progress: progressResult });
     } catch (error) {
       next(error);
     }
@@ -458,18 +559,3 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const httpServer = createServer(app);
   return httpServer;
 }
-
-// Import necessary Drizzle ORM functions and models
-import { db } from "@db";
-import { 
-  eq, and, desc, asc, 
-  like, inArray
-} from "drizzle-orm";
-import { 
-  categories,
-  courseCategories,
-  instructors,
-  modules,
-  progress,
-  pathCourses
-} from "@shared/schema";

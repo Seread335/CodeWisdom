@@ -13,6 +13,7 @@ import RoadmapPage from "@/pages/roadmap-page";
 import SpecializationPage from "@/pages/specialization-page";
 import SettingsPage from "@/pages/settings-page";
 import CategoryPage from "@/pages/category-page";
+import ProfilePage from "@/pages/profile-page";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 
@@ -29,6 +30,7 @@ function Router() {
       <ProtectedRoute path="/lessons/:id" component={LessonPage} />
       <ProtectedRoute path="/settings" component={SettingsPage} />
       <ProtectedRoute path="/categories/:category" component={CategoryPage} />
+      <ProtectedRoute path="/profile" component={ProfilePage} />
       <Route component={NotFound} />
     </Switch>
   );
