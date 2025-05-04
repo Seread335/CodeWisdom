@@ -1,18 +1,21 @@
-import { useState } from 'react';
-import CodeMirror from '@uiw/react-codemirror';
-import { javascript } from '@codemirror/lang-javascript';
-import { python } from '@codemirror/lang-python';
-import { html } from '@codemirror/lang-html';
-import { css } from '@codemirror/lang-css';
+import { useState, useEffect } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertCircle, PlayCircle, Check } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, CheckCircle, Code, Info, Play, Eye } from "lucide-react";
+import Editor from "@monaco-editor/react";
 
 export type CodeLanguage = 'javascript' | 'python' | 'html' | 'css';
 
-interface CodeEditorProps {
+const languageMap = {
+  javascript: 'javascript',
+  python: 'python',
+  html: 'html',
+  css: 'css',
+};
+
+export interface CodeEditorProps {
   title: string;
   description?: string;
   defaultCode: string;
@@ -26,15 +29,15 @@ interface CodeEditorProps {
 const getLanguageExtension = (language: CodeLanguage) => {
   switch (language) {
     case 'javascript':
-      return javascript();
+      return 'js';
     case 'python':
-      return python();
+      return 'py';
     case 'html':
-      return html();
+      return 'html';
     case 'css':
-      return css();
+      return 'css';
     default:
-      return javascript();
+      return 'txt';
   }
 };
 
@@ -43,185 +46,216 @@ export function CodeEditor({
   description, 
   defaultCode, 
   language, 
-  expectedOutput,
+  expectedOutput, 
   hint,
   solution,
   onComplete 
 }: CodeEditorProps) {
   const [code, setCode] = useState(defaultCode);
   const [output, setOutput] = useState('');
-  const [error, setError] = useState<string | null>(null);
-  const [showSolution, setShowSolution] = useState(false);
+  const [isError, setIsError] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
   const [showHint, setShowHint] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [showSolution, setShowSolution] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
-  const [activeTab, setActiveTab] = useState<'editor' | 'output'>('editor');
 
-  const runCode = async () => {
+  useEffect(() => {
+    if (language === 'html' || language === 'css') {
+      // For HTML/CSS, consider updating a preview
+    }
+  }, [code, language]);
+
+  const handleEditorChange = (value: string | undefined) => {
+    setCode(value || '');
+  };
+
+  const runCode = () => {
     setIsRunning(true);
-    setError(null);
     setOutput('');
-    setActiveTab('output');
-
-    try {
-      let result = '';
-
-      if (language === 'javascript') {
-        // Rất cẩn thận với eval(), trong môi trường thực tế, 
-        // sử dụng sandbox an toàn như VM2 hoặc thực thi phía server
-        try {
-          // Tạo một console sahư để bắt console.log
-          const originalConsole = window.console.log;
-          const logs: string[] = [];
+    setIsError(false);
+    setIsSuccess(false);
+    
+    setTimeout(() => {
+      try {
+        if (language === 'javascript') {
+          // Create a safe environment to run JS code
+          const originalLog = console.log;
+          let result = '';
           
-          window.console.log = (...args) => {
-            logs.push(args.map(arg => String(arg)).join(' '));
-            originalConsole(...args);
+          // Override console.log to capture output
+          console.log = (...args) => {
+            result += args.map(arg => 
+              typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ') + '\n';
           };
           
-          // eslint-disable-next-line no-new-func
-          new Function(code)();
-          
-          // Khôi phục console.log gốc
-          window.console.log = originalConsole;
-          
-          result = logs.join('\n');
-        } catch (jsError) {
-          throw new Error(jsError instanceof Error ? jsError.message : String(jsError));
+          try {
+            // Execute the code
+            // eslint-disable-next-line no-new-func
+            new Function(code)();
+            
+            // Check if output matches expected
+            if (expectedOutput && result.trim() === expectedOutput.trim()) {
+              setIsSuccess(true);
+              if (onComplete) onComplete();
+            }
+            
+            setOutput(result);
+          } catch (err) {
+            if (err instanceof Error) {
+              setOutput(`Lỗi: ${err.message}`);
+              setIsError(true);
+            }
+          } finally {
+            console.log = originalLog;
+          }
+        } else if (language === 'html' || language === 'css') {
+          // For HTML/CSS, just consider it successful if they've modified the code
+          if (code !== defaultCode) {
+            setIsSuccess(true);
+            if (onComplete) onComplete();
+          }
+          setOutput('HTML/CSS được cập nhật.');
+        } else {
+          setOutput(`Ngôn ngữ ${language} không được hỗ trợ chạy trực tiếp trong trình duyệt.`);
         }
-      } else if (language === 'python') {
-        // Trong môi trường thực tế, sẽ gửi code đến server để thực thi Python
-        setError("Chạy code Python yêu cầu xử lý phía server. Tính năng đang được phát triển.");
-        result = "# Kết quả sẽ hiển thị ở đây khi tính năng được hoàn thiện";
-      } else if (language === 'html') {
-        // Hiển thị kết quả HTML trong iframe
-        result = `HTML Preview sẽ hiển thị ở đây`;
-        // Trong triển khai thực tế, sử dụng iframe để render HTML
-      } else if (language === 'css') {
-        // CSS cần kết hợp với HTML để hiển thị
-        result = `CSS Preview sẽ hiển thị khi kết hợp với HTML`;
+      } catch (error) {
+        if (error instanceof Error) {
+          setOutput(`Lỗi: ${error.message}`);
+          setIsError(true);
+        }
+      } finally {
+        setIsRunning(false);
       }
-      
-      setOutput(result);
-      
-      // Kiểm tra kết quả nếu có expectedOutput
-      if (expectedOutput && result.trim() === expectedOutput.trim()) {
-        setIsCompleted(true);
-        if (onComplete) onComplete();
-      }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setIsRunning(false);
-    }
+    }, 500);
   };
 
   return (
-    <Card className="w-full max-w-5xl mx-auto shadow-lg border-2">
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <span>{title}</span>
-          {isCompleted && (
-            <span className="text-green-500 flex items-center">
-              <Check className="h-5 w-5 mr-1" /> Hoàn thành
-            </span>
-          )}
-        </CardTitle>
-        {description && <CardDescription>{description}</CardDescription>}
-      </CardHeader>
-      
-      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'editor' | 'output')}>
-        <div className="px-6">
-          <TabsList className="grid grid-cols-2 w-52">
-            <TabsTrigger value="editor">Editor</TabsTrigger>
-            <TabsTrigger value="output">Kết quả</TabsTrigger>
-          </TabsList>
+    <Card className="shadow-lg border-2">
+      <CardContent className="p-6">
+        <div className="mb-4">
+          <h3 className="text-lg font-medium mb-2">{title}</h3>
+          {description && <p className="text-muted-foreground mb-4">{description}</p>}
         </div>
-        
-        <CardContent className="p-0 pt-4">
-          <TabsContent value="editor" className="px-6 pb-6 m-0">
-            <div className="border rounded-md overflow-hidden">
-              <CodeMirror
-                value={showSolution ? (solution || code) : code}
-                height="300px"
-                extensions={[getLanguageExtension(language)]}
-                onChange={(value) => {
-                  if (!showSolution) setCode(value);
+
+        <Tabs defaultValue="editor" className="mb-4">
+          <TabsList className="mb-2">
+            <TabsTrigger value="editor" className="flex items-center">
+              <Code className="w-4 h-4 mr-2" />
+              Code
+            </TabsTrigger>
+            {hint && (
+              <TabsTrigger value="hint" className="flex items-center">
+                <Info className="w-4 h-4 mr-2" />
+                Gợi ý
+              </TabsTrigger>
+            )}
+            {solution && (
+              <TabsTrigger value="solution" className="flex items-center">
+                <Eye className="w-4 h-4 mr-2" />
+                Giải pháp
+              </TabsTrigger>
+            )}
+          </TabsList>
+          
+          <TabsContent value="editor">
+            <div className="border rounded-md overflow-hidden mb-4">
+              <div className="bg-muted p-2 text-xs flex justify-between items-center border-b">
+                <span>main.{getLanguageExtension(language)}</span>
+              </div>
+              <Editor
+                height="250px"
+                language={languageMap[language]}
+                theme="vs-dark"
+                value={code}
+                onChange={handleEditorChange}
+                options={{
+                  minimap: { enabled: false },
+                  fontSize: 14,
+                  scrollBeyondLastLine: false,
+                  wordWrap: 'on',
+                  automaticLayout: true,
                 }}
-                theme="dark"
-                readOnly={showSolution}
               />
             </div>
-            
-            <div className="flex flex-wrap gap-2 mt-4 justify-between">
-              <div className="space-x-2">
-                <Button 
-                  onClick={runCode} 
-                  disabled={isRunning}
-                  className="bg-green-600 hover:bg-green-700"
-                >
-                  <PlayCircle className="h-4 w-4 mr-2" />
-                  {isRunning ? 'Đang chạy...' : 'Chạy code'}
-                </Button>
-                
-                {hint && (
-                  <Button 
-                    variant="outline"
-                    onClick={() => setShowHint(!showHint)}
-                  >
-                    {showHint ? 'Ẩn gợi ý' : 'Xem gợi ý'}
-                  </Button>
-                )}
-              </div>
-              
-              {solution && (
-                <Button 
-                  variant={showSolution ? "default" : "outline"}
-                  onClick={() => setShowSolution(!showSolution)}
-                >
-                  {showSolution ? 'Quay lại code của bạn' : 'Xem lời giải'}
-                </Button>
-              )}
-            </div>
-            
-            {showHint && hint && (
-              <Alert className="mt-4 bg-yellow-50 border-yellow-200">
-                <AlertCircle className="h-4 w-4 text-yellow-600" />
-                <AlertTitle className="text-yellow-800">Gợi ý</AlertTitle>
-                <AlertDescription className="text-yellow-700">
-                  {hint}
-                </AlertDescription>
-              </Alert>
-            )}
           </TabsContent>
           
-          <TabsContent value="output" className="px-6 pb-6 m-0">
-            <div className="bg-black text-white p-4 rounded-md min-h-[300px] font-mono text-sm whitespace-pre-wrap">
-              {error ? (
-                <div className="text-red-400">
-                  <strong>Lỗi:</strong>
-                  <div>{error}</div>
+          {hint && (
+            <TabsContent value="hint">
+              <Alert className="mb-4">
+                <Info className="h-4 w-4 mr-2" />
+                <AlertDescription>{hint}</AlertDescription>
+              </Alert>
+            </TabsContent>
+          )}
+          
+          {solution && (
+            <TabsContent value="solution">
+              <div className="border rounded-md overflow-hidden mb-4">
+                <div className="bg-muted p-2 text-xs border-b">
+                  <span>Giải pháp</span>
                 </div>
-              ) : output ? (
-                output
-              ) : (
-                <div className="text-gray-400 italic">
-                  Kết quả sẽ hiển thị ở đây sau khi bạn chạy code.
-                </div>
-              )}
+                <Editor
+                  height="250px"
+                  language={languageMap[language]}
+                  theme="vs-dark"
+                  value={solution}
+                  options={{
+                    readOnly: true,
+                    minimap: { enabled: false },
+                    fontSize: 14,
+                    scrollBeyondLastLine: false,
+                    wordWrap: 'on',
+                    automaticLayout: true,
+                  }}
+                />
+              </div>
+            </TabsContent>
+          )}
+        </Tabs>
+
+        <div className="flex justify-between items-center mb-4">
+          <Button 
+            onClick={runCode}
+            disabled={isRunning}
+            className="flex items-center"
+          >
+            <Play className="w-4 h-4 mr-2" />
+            {language === 'html' || language === 'css' ? 'Cập nhật' : 'Chạy Code'}
+          </Button>
+          
+          {isSuccess && (
+            <div className="flex items-center text-green-600">
+              <CheckCircle className="w-5 h-5 mr-1" />
+              <span>Chính xác!</span>
+            </div>
+          )}
+        </div>
+
+        {/* Output area */}
+        {(output || expectedOutput) && (
+          <div className="border rounded-md">
+            <div className="bg-muted p-2 text-xs border-b">
+              <span>Output</span>
+            </div>
+            <div className={`p-3 ${isError ? 'text-red-500' : ''} ${isSuccess ? 'text-green-600' : ''} font-mono text-sm whitespace-pre-wrap`}>
+              {output || 'Nhấn "Chạy Code" để xem kết quả.'}
             </div>
             
-            {expectedOutput && (
-              <div className="mt-4 border-t pt-4">
-                <h4 className="font-medium mb-2">Kết quả mong đợi:</h4>
-                <div className="bg-gray-100 p-3 rounded-md font-mono text-sm">
+            {expectedOutput && !isSuccess && (
+              <div className="border-t p-3">
+                <div className="flex items-center mb-1 text-xs text-muted-foreground">
+                  <AlertCircle className="w-3 h-3 mr-1" />
+                  <span>Output mong đợi:</span>
+                </div>
+                <div className="font-mono text-sm text-muted-foreground">
                   {expectedOutput}
                 </div>
               </div>
             )}
-          </TabsContent>
-        </CardContent>
-      </Tabs>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 }

@@ -8,7 +8,7 @@ import {
   Home, BookOpen, GraduationCap, Layout, 
   Code, Database, Network, Server, 
   Settings, LogOut, Menu, X,
-  Info, Map, Laptop
+  Info, Map, Laptop, Terminal
 } from "lucide-react";
 
 export function Sidebar() {
@@ -23,6 +23,7 @@ export function Sidebar() {
     { path: "/courses", label: "Khóa học", icon: <BookOpen className="h-5 w-5 mr-3" /> },
     { path: "/roadmap", label: "Lộ trình học", icon: <Map className="h-5 w-5 mr-3" /> },
     { path: "/specialization", label: "Học theo chuyên ngành", icon: <Laptop className="h-5 w-5 mr-3" /> },
+    { path: "/code-practice", label: "Thực hành code", icon: <Terminal className="h-5 w-5 mr-3" /> },
     {
       label: "Danh mục",
       icon: <Layout className="h-5 w-5 mr-3" />,

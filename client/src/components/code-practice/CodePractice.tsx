@@ -46,7 +46,6 @@ export function CodePractice({ exercises, lessonId, onComplete }: CodePracticePr
       toast({
         title: "Bài tập hoàn thành!",
         description: `+${currentExercise.points} điểm`,
-        variant: "success"
       });
 
       if (newCompletedExercises.length === exercises.length && onComplete) {

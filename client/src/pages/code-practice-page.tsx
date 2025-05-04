@@ -74,7 +74,6 @@ export default function CodePracticePage() {
     toast({
       title: "Hoàn thành tất cả bài tập!",
       description: "Chúc mừng bạn đã hoàn thành tất cả bài tập thực hành.",
-      variant: "success"
     });
   };
 
