@@ -133,7 +133,7 @@ export default function CourseDetailsPage() {
                         {course.level === 'beginner' ? 'Cơ bản' : 
                          course.level === 'intermediate' ? 'Trung cấp' : 'Nâng cao'}
                       </Badge>
-                      {course.categories.map((category) => (
+                      {course.categories && course.categories.length > 0 && course.categories.map((category) => (
                         <Badge key={category.id} variant="secondary">
                           {category.name}
                         </Badge>
@@ -176,44 +176,52 @@ export default function CourseDetailsPage() {
                   
                   <TabsContent value="curriculum" className="space-y-4">
                     <Accordion type="single" collapsible className="w-full">
-                      {course.modules.map((module, index) => (
-                        <AccordionItem key={module.id} value={`module-${module.id}`}>
-                          <AccordionTrigger className="text-base font-medium">
-                            <div className="flex items-center">
-                              <span className="text-muted-foreground mr-2">
-                                {index + 1}.
-                              </span>
-                              {module.title}
-                            </div>
-                          </AccordionTrigger>
-                          <AccordionContent>
-                            <div className="space-y-2 pl-6">
-                              {module.lessons.map((lesson) => (
-                                <div key={lesson.id} className="border rounded-md p-3">
-                                  <div className="flex justify-between items-center">
-                                    <div className="flex items-center">
-                                      {lesson.type === 'video' ? (
-                                        <svg className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                      ) : (
-                                        <svg className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                                        </svg>
-                                      )}
-                                      <span>{lesson.title}</span>
+                      {course.modules && course.modules.length > 0 ? (
+                        course.modules.map((module, index) => (
+                          <AccordionItem key={module.id} value={`module-${module.id}`}>
+                            <AccordionTrigger className="text-base font-medium">
+                              <div className="flex items-center">
+                                <span className="text-muted-foreground mr-2">
+                                  {index + 1}.
+                                </span>
+                                {module.title}
+                              </div>
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="space-y-2 pl-6">
+                                {module.lessons && module.lessons.length > 0 ? (
+                                  module.lessons.map((lesson) => (
+                                    <div key={lesson.id} className="border rounded-md p-3">
+                                      <div className="flex justify-between items-center">
+                                        <div className="flex items-center">
+                                          {lesson.type === 'video' ? (
+                                            <svg className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                          ) : (
+                                            <svg className="h-5 w-5 mr-2 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                            </svg>
+                                          )}
+                                          <span>{lesson.title}</span>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                          {lesson.duration}
+                                        </div>
+                                      </div>
                                     </div>
-                                    <div className="text-sm text-muted-foreground">
-                                      {lesson.duration}
-                                    </div>
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-                          </AccordionContent>
-                        </AccordionItem>
-                      ))}
+                                  ))
+                                ) : (
+                                  <div className="text-center text-sm text-muted-foreground py-2">Không có bài học nào.</div>
+                                )}
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        ))
+                      ) : (
+                        <div className="text-center text-sm text-muted-foreground py-4">Khóa học này chưa có nội dung.</div>
+                      )}
                     </Accordion>
                   </TabsContent>
                   
