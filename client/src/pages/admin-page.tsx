@@ -559,8 +559,66 @@ export default function AdminPage() {
               <CardDescription>Quản lý tất cả các danh mục của hệ thống</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center h-40">
-                <p>Chức năng đang được phát triển</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="border rounded-lg p-4 bg-white shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">Thêm danh mục mới</h3>
+                  <div className="space-y-2">
+                    <div>
+                      <Label htmlFor="categoryName">Tên danh mục</Label>
+                      <Input id="categoryName" placeholder="Nhập tên danh mục mới" />
+                    </div>
+                    <div>
+                      <Label htmlFor="categoryDesc">Mô tả</Label>
+                      <Textarea id="categoryDesc" placeholder="Mô tả ngắn về danh mục" />
+                    </div>
+                    <div>
+                      <Label htmlFor="categoryIcon">Biểu tượng</Label>
+                      <Input id="categoryIcon" placeholder="fa-code, fa-server, v.v." />
+                      <p className="text-xs text-gray-500 mt-1">Sử dụng tên biểu tượng từ Font Awesome</p>
+                    </div>
+                    <Button className="w-full mt-2">
+                      Thêm danh mục
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="border rounded-lg p-4 bg-white shadow-sm">
+                  <h3 className="text-lg font-semibold mb-2">Danh mục hiện tại</h3>
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                    <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                      <div>
+                        <span className="font-medium">Lập trình Frontend</span>
+                        <p className="text-sm text-gray-500">HTML, CSS, JavaScript, React</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">Sửa</Button>
+                        <Button variant="destructive" size="sm">Xóa</Button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                      <div>
+                        <span className="font-medium">Lập trình Backend</span>
+                        <p className="text-sm text-gray-500">Node.js, Express, Django, Laravel</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">Sửa</Button>
+                        <Button variant="destructive" size="sm">Xóa</Button>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center justify-between p-3 border rounded-md bg-gray-50">
+                      <div>
+                        <span className="font-medium">DevOps</span>
+                        <p className="text-sm text-gray-500">Docker, Kubernetes, CI/CD</p>
+                      </div>
+                      <div className="flex space-x-2">
+                        <Button variant="outline" size="sm">Sửa</Button>
+                        <Button variant="destructive" size="sm">Xóa</Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -573,8 +631,76 @@ export default function AdminPage() {
               <CardDescription>Quản lý thông tin về giảng viên trong hệ thống</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center h-40">
-                <p>Chức năng đang được phát triển</p>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div className="col-span-1 md:col-span-2">
+                  <div className="border rounded-lg p-4 bg-white shadow-sm">
+                    <h3 className="text-lg font-semibold mb-4">Danh sách giảng viên</h3>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 p-3 border rounded-md bg-gray-50">
+                        <div className="h-16 w-16 rounded-full bg-primary flex items-center justify-center text-white text-xl">
+                          <span>HTB</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">Huỳnh Thái Bảo</h4>
+                          <p className="text-sm text-gray-600">Giảng viên Lập trình, Cloud Computing</p>
+                          <div className="flex gap-2 mt-1">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">10 khóa học</span>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Đang hoạt động</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">Xem chi tiết</Button>
+                          <Button variant="destructive" size="sm">Xóa</Button>
+                        </div>
+                      </div>
+                      
+                      <div className="flex items-center gap-4 p-3 border rounded-md bg-gray-50">
+                        <div className="h-16 w-16 rounded-full bg-primary/80 flex items-center justify-center text-white text-xl">
+                          <span>NVA</span>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-semibold">Nguyễn Văn An</h4>
+                          <p className="text-sm text-gray-600">Giảng viên An ninh mạng</p>
+                          <div className="flex gap-2 mt-1">
+                            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">6 khóa học</span>
+                            <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">Đang hoạt động</span>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm">Xem chi tiết</Button>
+                          <Button variant="destructive" size="sm">Xóa</Button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="col-span-1">
+                  <div className="border rounded-lg p-4 bg-white shadow-sm">
+                    <h3 className="text-lg font-semibold mb-4">Thêm giảng viên mới</h3>
+                    <div className="space-y-3">
+                      <div>
+                        <Label htmlFor="instructorName">Tên giảng viên</Label>
+                        <Input id="instructorName" placeholder="Nhập họ tên đầy đủ" />
+                      </div>
+                      <div>
+                        <Label htmlFor="instructorSpecialization">Chuyên môn</Label>
+                        <Input id="instructorSpecialization" placeholder="Lập trình, AI, DevOps,..." />
+                      </div>
+                      <div>
+                        <Label htmlFor="instructorBio">Tiểu sử</Label>
+                        <Textarea id="instructorBio" placeholder="Giới thiệu ngắn về giảng viên" rows={4} />
+                      </div>
+                      <div>
+                        <Label htmlFor="instructorAvatar">Ảnh đại diện</Label>
+                        <Input id="instructorAvatar" type="file" accept="image/*" />
+                      </div>
+                      <Button className="w-full mt-3">
+                        Thêm giảng viên
+                      </Button>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -587,8 +713,114 @@ export default function AdminPage() {
               <CardDescription>Xem các thống kê về người dùng và khóa học</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="flex flex-col items-center justify-center h-40">
-                <p>Chức năng đang được phát triển</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="border rounded-md shadow-sm p-4 bg-white">
+                  <h3 className="text-gray-500 font-medium text-sm mb-2">Tổng số người dùng</h3>
+                  <div className="flex items-end">
+                    <span className="text-3xl font-bold">1,205</span>
+                    <span className="text-green-500 ml-2 text-sm">+5.6%</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">So với tháng trước</p>
+                </div>
+                
+                <div className="border rounded-md shadow-sm p-4 bg-white">
+                  <h3 className="text-gray-500 font-medium text-sm mb-2">Khóa học</h3>
+                  <div className="flex items-end">
+                    <span className="text-3xl font-bold">68</span>
+                    <span className="text-green-500 ml-2 text-sm">+2.1%</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">8 khóa học mới trong tháng</p>
+                </div>
+                
+                <div className="border rounded-md shadow-sm p-4 bg-white">
+                  <h3 className="text-gray-500 font-medium text-sm mb-2">Ghi danh</h3>
+                  <div className="flex items-end">
+                    <span className="text-3xl font-bold">3,945</span>
+                    <span className="text-green-500 ml-2 text-sm">+12.3%</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Tăng mạnh so với quý trước</p>
+                </div>
+                
+                <div className="border rounded-md shadow-sm p-4 bg-white">
+                  <h3 className="text-gray-500 font-medium text-sm mb-2">Doanh thu</h3>
+                  <div className="flex items-end">
+                    <span className="text-3xl font-bold">62.5M</span>
+                    <span className="text-green-500 ml-2 text-sm">+8.4%</span>
+                  </div>
+                  <p className="text-xs text-gray-500 mt-1">Đơn vị: VNĐ</p>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="border rounded-lg overflow-hidden shadow-sm">
+                  <div className="bg-white p-4 border-b">
+                    <h3 className="font-semibold">Khóa học phổ biến</h3>
+                  </div>
+                  <div className="bg-white divide-y">
+                    <div className="p-3 flex items-center">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-primary mr-3">1</div>
+                      <div className="flex-1">
+                        <span className="font-medium">Lập trình Web Frontend với React</span>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>892 học viên</span>
+                          <span className="mx-2">•</span>
+                          <span>4.8 ⭐</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 flex items-center">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-primary mr-3">2</div>
+                      <div className="flex-1">
+                        <span className="font-medium">Docker & Kubernetes - Từ cơ bản đến nâng cao</span>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>754 học viên</span>
+                          <span className="mx-2">•</span>
+                          <span>4.7 ⭐</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-3 flex items-center">
+                      <div className="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center text-primary mr-3">3</div>
+                      <div className="flex-1">
+                        <span className="font-medium">Điện toán đám mây với AWS</span>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <span>681 học viên</span>
+                          <span className="mx-2">•</span>
+                          <span>4.9 ⭐</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="border rounded-lg overflow-hidden shadow-sm">
+                  <div className="bg-white p-4 border-b">
+                    <h3 className="font-semibold">Người dùng mới nhất</h3>
+                  </div>
+                  <div className="bg-white p-4 space-y-3">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">TH</div>
+                      <div className="flex-1">
+                        <span className="font-medium">Trần Hưng</span>
+                        <p className="text-sm text-gray-500">Đã đăng ký: 2 giờ trước</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mr-3">NL</div>
+                      <div className="flex-1">
+                        <span className="font-medium">Nguyễn Linh</span>
+                        <p className="text-sm text-gray-500">Đã đăng ký: 5 giờ trước</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center mr-3">LH</div>
+                      <div className="flex-1">
+                        <span className="font-medium">Lê Hương</span>
+                        <p className="text-sm text-gray-500">Đã đăng ký: 1 ngày trước</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>

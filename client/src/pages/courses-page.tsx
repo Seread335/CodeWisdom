@@ -6,8 +6,10 @@ import { CourseCard } from "@/components/courses/course-card";
 import { CourseFilter } from "@/components/courses/course-filter";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { Search, Upload, PlusCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
 
 export default function CoursesPage() {
   const [searchQuery, setSearchQuery] = useState("");

@@ -15,6 +15,8 @@ import SettingsPage from "@/pages/settings-page";
 import CategoryPage from "@/pages/category-page";
 import ProfilePage from "@/pages/profile-page";
 import AdminPage from "@/pages/admin-page";
+import Contact from "@/pages/Contact";
+import Team from "@/pages/Team";
 import { ProtectedRoute } from "./lib/protected-route";
 import { AuthProvider } from "@/hooks/use-auth";
 
@@ -33,6 +35,8 @@ function Router() {
       <ProtectedRoute path="/categories/:category" component={CategoryPage} />
       <ProtectedRoute path="/profile" component={ProfilePage} />
       <ProtectedRoute path="/admin" component={AdminPage} adminOnly={true} />
+      <ProtectedRoute path="/contact" component={Contact} />
+      <ProtectedRoute path="/team" component={Team} />
       <Route component={NotFound} />
     </Switch>
   );
