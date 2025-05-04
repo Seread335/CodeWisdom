@@ -27,6 +27,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   enrollments: many(enrollments),
   progress: many(progress),
   reviews: many(reviews),
+  userBadges: many(userBadges),
+  userAchievements: many(userAchievements),
 }));
 
 // Categories
@@ -387,3 +389,123 @@ export type InsertProgress = typeof progress.$inferInsert;
 
 export type Review = typeof reviews.$inferSelect;
 export type InsertReview = typeof reviews.$inferInsert;
+
+// Badges System
+export const badgeTypeEnum = pgEnum("badge_type", ["course", "achievement", "streak", "special"]);
+
+export const badges = pgTable("badges", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  imageUrl: text("image_url").notNull(),
+  type: text("type", { enum: ["course", "achievement", "streak", "special"] }).notNull(),
+  requiredPoints: integer("required_points").default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const badgesRelations = relations(badges, ({ many }) => ({
+  userBadges: many(userBadges),
+  achievements: many(achievements),
+}));
+
+// User Badges
+export const userBadges = pgTable("user_badges", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  badgeId: integer("badge_id").notNull().references(() => badges.id, { onDelete: "cascade" }),
+  earnedAt: timestamp("earned_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    unq: unique().on(table.userId, table.badgeId),
+  };
+});
+
+export const userBadgesRelations = relations(userBadges, ({ one }) => ({
+  user: one(users, {
+    fields: [userBadges.userId],
+    references: [users.id],
+  }),
+  badge: one(badges, {
+    fields: [userBadges.badgeId],
+    references: [badges.id],
+  }),
+}));
+
+// Achievements
+export const achievementTypeEnum = pgEnum("achievement_type", ["login_streak", "course_completion", "perfect_quiz", "community_contribution"]);
+
+export const achievements = pgTable("achievements", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  type: text("type", { enum: ["login_streak", "course_completion", "perfect_quiz", "community_contribution"] }).notNull(),
+  requiredCount: integer("required_count").default(1).notNull(),
+  points: integer("points").default(0).notNull(),
+  badgeId: integer("badge_id").references(() => badges.id),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const achievementsRelations = relations(achievements, ({ many, one }) => ({
+  userAchievements: many(userAchievements),
+  badge: one(badges, {
+    fields: [achievements.badgeId],
+    references: [badges.id],
+  }),
+}));
+
+// User Achievements
+export const userAchievements = pgTable("user_achievements", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  achievementId: integer("achievement_id").notNull().references(() => achievements.id, { onDelete: "cascade" }),
+  progress: integer("progress").default(0).notNull(),
+  completed: boolean("completed").default(false).notNull(),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    unq: unique().on(table.userId, table.achievementId),
+  };
+});
+
+export const userAchievementsRelations = relations(userAchievements, ({ one }) => ({
+  user: one(users, {
+    fields: [userAchievements.userId],
+    references: [users.id],
+  }),
+  achievement: one(achievements, {
+    fields: [userAchievements.achievementId],
+    references: [achievements.id],
+  }),
+}));
+
+// Insert and Select schemas for Badges and Achievements
+export const insertBadgeSchema = createInsertSchema(badges, {
+  name: (schema) => schema.min(2, "Tên huy hiệu phải có ít nhất 2 ký tự"),
+  description: (schema) => schema.min(5, "Mô tả huy hiệu phải có ít nhất 5 ký tự"),
+});
+
+export const selectBadgeSchema = createSelectSchema(badges);
+
+export const insertAchievementSchema = createInsertSchema(achievements, {
+  name: (schema) => schema.min(2, "Tên thành tích phải có ít nhất 2 ký tự"),
+  description: (schema) => schema.min(5, "Mô tả thành tích phải có ít nhất 5 ký tự"),
+});
+
+export const selectAchievementSchema = createSelectSchema(achievements);
+
+// Types for Badges and Achievements
+export type Badge = typeof badges.$inferSelect;
+export type InsertBadge = z.infer<typeof insertBadgeSchema>;
+
+export type UserBadge = typeof userBadges.$inferSelect;
+export type InsertUserBadge = typeof userBadges.$inferInsert;
+
+export type Achievement = typeof achievements.$inferSelect;
+export type InsertAchievement = z.infer<typeof insertAchievementSchema>;
+
+export type UserAchievement = typeof userAchievements.$inferSelect;
+export type InsertUserAchievement = typeof userAchievements.$inferInsert;
