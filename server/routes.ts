@@ -744,6 +744,172 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Instructors route
+
+  // Get all courses for admin
+  app.get("/api/admin/courses", requireAdmin, async (req, res, next) => {
+    try {
+      const courses = await storage.getCourses({});
+      res.json(courses);
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Upload course
+  app.post("/api/admin/courses/upload", requireAdmin, upload.fields([
+    { name: 'file', maxCount: 1 },
+    { name: 'contentFile', maxCount: 1 }
+  ]), async (req, res, next) => {
+    try {
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      const courseData = req.body;
+      
+      // Prepare the course object
+      const courseObj: any = {
+        title: courseData.title,
+        description: courseData.description,
+        level: courseData.level,
+        price: parseFloat(courseData.price) || 0,
+        originalPrice: parseFloat(courseData.originalPrice) || 0,
+        instructorId: courseData.instructorId ? parseInt(courseData.instructorId) : 1, // Default instructor
+        enrollmentCount: 0,
+      };
+      
+      // If the course image was uploaded
+      if (files.file && files.file[0]) {
+        const imageFile = files.file[0];
+        const relativePath = path.relative(process.cwd(), imageFile.path);
+        courseObj.imageUrl = '/' + relativePath.replace(/\\/g, '/');
+      }
+      
+      // Create the course
+      const course = await storage.createCourse(courseObj);
+      
+      // Associate with categories
+      if (courseData.categoryIds) {
+        // Can be multiple categories separated by comma
+        const categoryIds = courseData.categoryIds.split(',').map((id: string) => parseInt(id.trim()));
+        for (const categoryId of categoryIds) {
+          await db.insert(courseCategories).values({
+            courseId: course.id,
+            categoryId
+          });
+        }
+      }
+      
+      // Process the content file if uploaded
+      if (files.contentFile && files.contentFile[0]) {
+        const contentFile = files.contentFile[0];
+        const fileContent = fs.readFileSync(contentFile.path, 'utf8');
+        
+        // Parse the content depending on file type
+        let modules: any[] = [];
+        
+        if (contentFile.mimetype === 'application/json') {
+          // If it's a JSON file, parse it directly
+          try {
+            modules = JSON.parse(fileContent);
+          } catch (error) {
+            console.error("Error parsing JSON content:", error);
+          }
+        } else if (contentFile.mimetype === 'text/plain') {
+          // If it's a text file, try to detect structure
+          const lines = fileContent.split('\n');
+          let currentModule: any = null;
+          let currentLesson: any = null;
+          
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (!trimmedLine) continue;
+            
+            // Check if this is a module title (typically starts with #)
+            if (trimmedLine.startsWith('#') || trimmedLine.startsWith('Module') || trimmedLine.startsWith('Phần') || trimmedLine.startsWith('Chương')) {
+              // New module
+              currentModule = {
+                title: trimmedLine.replace(/^[#\s]+/, '').trim(),
+                lessons: []
+              };
+              modules.push(currentModule);
+            } 
+            // Check if this is a lesson title
+            else if (currentModule && (trimmedLine.startsWith('##') || trimmedLine.startsWith('Lesson') || trimmedLine.startsWith('Bài'))) {
+              // New lesson
+              currentLesson = {
+                title: trimmedLine.replace(/^[#\s]+/, '').trim(),
+                content: ''
+              };
+              currentModule.lessons.push(currentLesson);
+            }
+            // Add to lesson content
+            else if (currentLesson) {
+              currentLesson.content += trimmedLine + '\n';
+            }
+          }
+        }
+        
+        // Create modules and lessons
+        let order = 1;
+        for (const moduleData of modules) {
+          const module = await storage.createModule({
+            title: moduleData.title,
+            description: moduleData.description || '',
+            courseId: course.id,
+            order: order++
+          });
+          
+          // Create lessons for this module
+          if (moduleData.lessons && Array.isArray(moduleData.lessons)) {
+            let lessonOrder = 1;
+            for (const lessonData of moduleData.lessons) {
+              await storage.createLesson({
+                title: lessonData.title,
+                content: typeof lessonData.content === 'string' ? 
+                  { sections: [{ type: 'text', content: lessonData.content }] } : 
+                  lessonData.content,
+                type: lessonData.type || 'text',
+                duration: lessonData.duration || null,
+                moduleId: module.id,
+                order: lessonOrder++,
+                isPreview: false
+              });
+            }
+          }
+        }
+      }
+      
+      res.status(201).json({ message: "Course created successfully", course });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Delete course
+  app.delete("/api/admin/courses/:id", requireAdmin, async (req, res, next) => {
+    try {
+      const courseId = parseInt(req.params.id);
+      const result = await storage.deleteCourse(courseId);
+      
+      if (result) {
+        res.json({ message: "Course deleted successfully" });
+      } else {
+        res.status(404).json({ message: "Course not found" });
+      }
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  // Get instructors
+  app.get("/api/instructors", async (req, res, next) => {
+    try {
+      const instructorsResult = await db.select().from(instructors);
+      res.json(instructorsResult);
+    } catch (error) {
+      next(error);
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
