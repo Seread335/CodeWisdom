@@ -124,7 +124,15 @@ export function useAuth() {
   if (!context) {
     throw new Error("useAuth must be used within an AuthProvider");
   }
-  return context;
+  // Thêm hàm logout tiện lợi
+  const logout = () => {
+    context.logoutMutation.mutate();
+  };
+  
+  return {
+    ...context,
+    logout
+  };
 }
 
 // Tất cả exports để giữ bảo của các implementations

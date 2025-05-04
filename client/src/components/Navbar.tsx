@@ -1,10 +1,13 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import { useAuth } from "@/hooks/use-auth";
+import { FaUserCircle } from "react-icons/fa";
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [location] = useLocation();
   const [scrolled, setScrolled] = useState(false);
+  const { user, isLoading, logout } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -76,8 +79,34 @@ export default function Navbar() {
           </div>
           
           <div className="hidden md:flex items-center space-x-4">
-            <a href="#" className="text-primary hover:text-primary-dark font-semibold">Đăng nhập</a>
-            <a href="#" className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Đăng ký</a>
+            {isLoading ? (
+              <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
+            ) : user ? (
+              <div className="flex items-center space-x-4">
+                <Link 
+                  href="/profile" 
+                  className={`${isActive('/profile') ? 'text-primary' : 'text-dark'} hover:text-primary flex items-center space-x-2 font-medium transition`}
+                >
+                  <FaUserCircle className="text-xl" />
+                  <span>{user.displayName || user.username}</span>
+                </Link>
+                <button 
+                  onClick={logout} 
+                  className="text-red-500 hover:text-red-600 font-medium transition"
+                >
+                  Đăng xuất
+                </button>
+              </div>
+            ) : (
+              <>
+                <Link href="/login" className="text-primary hover:text-primary-dark font-semibold">
+                  Đăng nhập
+                </Link>
+                <Link href="/register" className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">
+                  Đăng ký
+                </Link>
+              </>
+            )}
           </div>
           
           <div className="md:hidden">
@@ -125,9 +154,47 @@ export default function Navbar() {
             >
               Liên hệ
             </Link>
-            <div className="flex space-x-4 pt-3 border-t">
-              <a href="#" className="text-primary hover:text-primary-dark font-semibold">Đăng nhập</a>
-              <a href="#" className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition">Đăng ký</a>
+            <div className="flex flex-col space-y-3 pt-3 border-t">
+              {isLoading ? (
+                <div className="h-8 w-24 bg-gray-200 animate-pulse rounded"></div>
+              ) : user ? (
+                <>
+                  <Link 
+                    href="/profile" 
+                    onClick={closeMobileMenu}
+                    className={`${isActive('/profile') ? 'text-primary' : 'text-dark'} hover:text-primary flex items-center space-x-2 font-medium transition`}
+                  >
+                    <FaUserCircle className="text-xl" />
+                    <span>{user.displayName || user.username}</span>
+                  </Link>
+                  <button 
+                    onClick={() => {
+                      logout();
+                      closeMobileMenu();
+                    }} 
+                    className="text-red-500 hover:text-red-600 font-medium transition text-left"
+                  >
+                    Đăng xuất
+                  </button>
+                </>
+              ) : (
+                <div className="flex space-x-4">
+                  <Link 
+                    href="/login" 
+                    onClick={closeMobileMenu}
+                    className="text-primary hover:text-primary-dark font-semibold"
+                  >
+                    Đăng nhập
+                  </Link>
+                  <Link 
+                    href="/register" 
+                    onClick={closeMobileMenu}
+                    className="bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-600 transition"
+                  >
+                    Đăng ký
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
         </div>
