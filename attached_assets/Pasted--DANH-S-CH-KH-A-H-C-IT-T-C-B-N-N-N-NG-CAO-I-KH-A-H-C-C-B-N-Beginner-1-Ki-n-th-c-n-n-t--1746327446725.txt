@@ -1,0 +1,177 @@
+🎓 DANH SÁCH KHÓA HỌC IT TỪ CƠ BẢN ĐẾN NÂNG CAO
+🟢 I. KHÓA HỌC CƠ BẢN (Beginner)
+1. Kiến thức nền tảng CNTT
+Tin học văn phòng (MS Word, Excel, PowerPoint)
+
+Tổng quan Công nghệ Thông tin
+
+Cấu trúc máy tính và hệ điều hành
+
+Mạng máy tính cơ bản (IP, DNS, TCP/IP)
+
+Hệ điều hành Linux cơ bản
+
+An toàn thông tin cơ bản
+
+Gõ phím 10 ngón + sử dụng công cụ Google (Drive, Docs...)
+
+2. Tư duy lập trình & Python cơ bản
+Tư duy logic và thuật toán
+
+Lập trình Python cho người mới
+
+Biến, vòng lặp, hàm, cấu trúc điều kiện
+
+Thực hành bài tập Python đơn giản
+
+3. Lập trình Web cơ bản
+HTML & CSS từ đầu
+
+JavaScript cơ bản (ES6)
+
+Tạo website đầu tiên (1 trang cá nhân)
+
+4. Sử dụng Git và GitHub
+Khái niệm Git, GitHub
+
+Các lệnh Git cơ bản
+
+Làm việc với repository, commit, branch
+
+🟡 II. KHÓA HỌC TRUNG CẤP (Intermediate)
+1. Lập trình nâng cao
+Python nâng cao (OOP, xử lý file, Exception)
+
+JavaScript nâng cao
+
+Java / C# cơ bản
+
+Giải thuật & Cấu trúc dữ liệu (Stack, Queue, Tree...)
+
+2. Lập trình Web Fullstack
+Frontend nâng cao:
+
+React.js / Vue.js
+
+CSS framework: TailwindCSS / Bootstrap
+
+Responsive Design
+
+Backend cơ bản:
+
+Node.js / Express.js hoặc Django / Flask
+
+REST API cơ bản
+
+Kết nối cơ sở dữ liệu (MySQL, MongoDB)
+
+Dự án: Blog cá nhân / Web bán hàng
+
+3. Cơ sở dữ liệu
+SQL cơ bản đến nâng cao (JOIN, Subquery, Index)
+
+MongoDB và NoSQL
+
+Thiết kế cơ sở dữ liệu
+
+4. Linux & dòng lệnh
+Linux Shell (bash, zsh)
+
+Quản lý tệp, user, phân quyền
+
+Cài đặt server Apache / Nginx
+
+5. Mạng máy tính nâng cao
+Cấu trúc TCP/IP
+
+Routing, NAT, DNS
+
+Kiến thức về mạng LAN, WAN
+
+Quản trị mạng
+
+🔵 III. KHÓA HỌC NÂNG CAO (Advanced)
+1. Kỹ thuật phần mềm
+Kiến trúc phần mềm (MVC, MVVM, Clean Code)
+
+Design Patterns (Singleton, Observer, Factory…)
+
+Kiểm thử phần mềm (Unit test, Integration test)
+
+Quản lý dự án phần mềm: Agile, Scrum
+
+2. DevOps & CI/CD
+Docker & Docker Compose
+
+Jenkins / GitHub Actions
+
+Kubernetes cơ bản
+
+Terraform (IaC)
+
+Triển khai trên AWS / GCP
+
+3. Cloud Computing
+Khóa học AWS / GCP / Azure từ A-Z
+
+Serverless, Cloud Storage, Load Balancing
+
+Thiết lập hệ thống web cloud-native
+
+4. Khoa học dữ liệu & AI
+Python cho phân tích dữ liệu
+
+Numpy, Pandas, Matplotlib, Seaborn
+
+Machine Learning cơ bản: Scikit-learn
+
+Deep Learning: TensorFlow / PyTorch
+
+NLP, Computer Vision
+
+Dự án: Dự đoán, phân loại, nhận diện hình ảnh
+
+5. An ninh mạng (Cybersecurity)
+Bảo mật hệ thống và mạng
+
+OWASP Top 10
+
+Ethical Hacking (Kali Linux, Metasploit)
+
+CTF & Forensic
+
+Khóa học CEH, OSCP định hướng chuyên sâu
+
+6. Blockchain & Web3
+Blockchain fundamentals
+
+Solidity & Ethereum
+
+Smart Contract & DApp
+
+Tokenomics, DeFi
+
+🟣 IV. CHUYÊN NGÀNH – NGHỀ NGHIỆP CỤ THỂ
+Nghề nghiệp	Khóa học nên học
+Frontend Developer	HTML, CSS, JavaScript, React/Vue, Responsive Design, UX/UI
+Backend Developer	Python/Node/Java, API, SQL, Authentication, DevOps
+Fullstack Developer	Frontend + Backend + Git + Deploy
+Mobile Developer	Flutter / React Native / Kotlin / Swift
+Data Analyst	SQL + Excel + Python + Power BI / Tableau
+AI/ML Engineer	Python + Scikit-learn + Deep Learning + Data Preprocessing
+Cybersecurity	Linux + Networking + Ethical Hacking + Security Tools
+DevOps Engineer	Git + Docker + CI/CD + Kubernetes + Cloud
+Game Developer	Unity (C#), Unreal (C++), Game Physics, Level Design
+Blockchain Developer	Solidity, Web3.js, Smart Contract, Truffle, DeFi
+
+🧩 V. PHỤ LỤC: LỘ TRÌNH HỌC THAM KHẢO
+▶️ Lộ trình học từ con số 0 đến Dev chuyên nghiệp:
+Cơ bản về IT → Tư duy lập trình
+
+Lập trình Python → Git → Web cơ bản
+
+Web nâng cao (React + Node) + Database
+
+Xây dự án thực tế
+
+Học chuyên sâu theo hướng bạn chọn (AI, DevOps, Security...)

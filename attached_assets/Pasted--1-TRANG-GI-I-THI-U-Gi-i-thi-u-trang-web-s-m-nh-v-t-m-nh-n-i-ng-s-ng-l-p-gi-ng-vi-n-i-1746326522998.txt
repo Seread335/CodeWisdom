@@ -1,0 +1,198 @@
+🌐 1. TRANG GIỚI THIỆU
+Giới thiệu trang web, sứ mệnh và tầm nhìn
+
+Đội ngũ sáng lập / giảng viên
+
+Đối tượng phục vụ: học sinh, sinh viên, người trái ngành, lập trình viên
+
+Lộ trình đề xuất theo từng mục tiêu (đi làm, freelancing, nghiên cứu, khởi nghiệp)
+
+📚 2. LỘ TRÌNH HỌC TOÀN DIỆN (THEO CHỦ ĐỀ & CẤP ĐỘ)
+⚙️ 2.1. Nền tảng CNTT
+Kiến thức máy tính cơ bản
+
+Phần cứng, phần mềm
+
+Cách sử dụng công cụ hỗ trợ học IT (VS Code, GitHub, StackOverflow)
+
+🧑‍💻 2.2. Lập trình cơ bản (Cho người mới bắt đầu)
+Làm quen với lập trình (tư duy lập trình, giải thuật)
+
+Cấu trúc dữ liệu: mảng, danh sách, stack, queue, tree, graph
+
+Giải thuật: tìm kiếm, sắp xếp, đệ quy
+
+Các ngôn ngữ cơ bản:
+
+Python (dễ học, phổ biến)
+
+JavaScript (nền tảng web)
+
+C/C++ (gần hệ thống, thi olympic)
+
+🔍 3. HỌC THEO CHUYÊN NGÀNH
+🌐 3.1. Lập trình Web
+🔸 Frontend:
+HTML5, CSS3, JavaScript ES6+
+
+Responsive Design (Flexbox, Grid)
+
+Framework: React, Vue, Angular
+
+UI/UX, thiết kế web hiện đại
+
+🔸 Backend:
+Node.js (Express), Django, Flask, Laravel
+
+Authentication (JWT, OAuth)
+
+REST API, GraphQL
+
+🔸 Cơ sở dữ liệu:
+MySQL, PostgreSQL
+
+MongoDB, Firebase
+
+ORM (Sequelize, SQLAlchemy)
+
+📱 3.2. Mobile App Development
+Flutter (Dart), React Native
+
+Android Native (Java/Kotlin), iOS (Swift)
+
+UI Mobile, tích hợp API, SQLite
+
+🧠 3.3. Trí tuệ nhân tạo – AI/ML/DL
+Python nâng cao
+
+Thư viện: Numpy, Pandas, Matplotlib, Seaborn
+
+Machine Learning (Scikit-learn, XGBoost)
+
+Deep Learning (TensorFlow, PyTorch)
+
+Xử lý ngôn ngữ (NLP)
+
+Computer Vision
+
+🧑‍🚀 3.4. Data Science & Big Data
+Data Cleaning, Analysis, Visualization
+
+SQL nâng cao, Data Pipeline
+
+Apache Spark, Hadoop, Airflow
+
+🔐 3.5. An ninh mạng – Cybersecurity
+Mạng máy tính nâng cao
+
+Bảo mật hệ thống, bảo mật web
+
+Pentesting cơ bản
+
+CEH, OSCP roadmap
+
+Phát hiện và phòng chống tấn công: XSS, SQLi, RCE…
+
+🧪 3.6. Kiểm thử phần mềm – Software Testing
+Manual Testing
+
+Automation: Selenium, Postman, Playwright
+
+TestCase, Bug Report, CI/CD Testing
+
+🚀 3.7. DevOps & Cloud
+Linux & Shell script
+
+Git, GitHub, CI/CD (GitHub Actions, Jenkins)
+
+Docker, Kubernetes
+
+Cloud: AWS, GCP, Azure
+
+IaC: Terraform, Ansible
+
+🎮 3.8. Phát triển Game
+Unity (C#), Unreal Engine (C++)
+
+2D, 3D Game Dev
+
+AI trong Game
+
+Hệ thống vật lý, animation
+
+⛓️ 3.9. Blockchain & Web3
+Smart Contract với Solidity
+
+Ethereum, Binance Smart Chain
+
+Metamask, NFT, DApps
+
+DeFi cơ bản
+
+🧩 4. BÀI TẬP & DỰ ÁN THỰC TẾ
+Bài tập từ cơ bản đến nâng cao
+
+Mini Projects (to-do app, blog, chatbot,…)
+
+Clone các website nổi tiếng: Facebook, TikTok, Netflix, Tiki
+
+Dự án teamwork (GitHub workflow, Agile/Scrum)
+
+Hệ thống nộp bài, chấm điểm, nhận phản hồi
+
+🧠 5. HỆ THỐNG KIỂM TRA – CHỨNG CHỈ
+Quiz sau mỗi bài học
+
+Bài thi giữa kỳ/cuối kỳ
+
+Chứng chỉ nội bộ (hoặc liên kết với Cert quốc tế)
+
+Hệ thống theo dõi tiến độ học
+
+👥 6. CỘNG ĐỒNG HỌC TẬP & HỖ TRỢ
+Diễn đàn hỏi đáp, hỗ trợ kỹ thuật
+
+Group chat (Zalo, Discord)
+
+Cộng đồng chia sẻ kiến thức, tips
+
+📞 7. HỌC VỚI MENTOR – COACHING
+Học 1-1 hoặc theo nhóm
+
+Mentor kiểm tra bài, giao project, hỗ trợ phỏng vấn
+
+Có thể có gói trả phí hoặc miễn phí
+
+📂 8. THƯ VIỆN TÀI LIỆU – RESOURCE HUB
+Ebook, slide bài giảng
+
+Cheatsheet, Roadmap
+
+Bộ công cụ, plugin, theme
+
+Tools: IDE, Linter, Debugger, Git GUI
+
+💼 9. HƯỚNG NGHIỆP & VIỆC LÀM
+Viết CV, portfolio
+
+Mô phỏng phỏng vấn (Mock Interview)
+
+Lộ trình nghề nghiệp (Fresher → Senior → Leader)
+
+Kết nối với nhà tuyển dụng
+
+Câu hỏi thường gặp trong tuyển dụng IT
+
+🧭 10. CHỨC NĂNG HỆ THỐNG CẦN CÓ
+Đăng ký / đăng nhập (OAuth, Google)
+
+Giao diện cá nhân hóa (Dark mode, dashboard)
+
+Theo dõi tiến trình học, thành tích
+
+Tích hợp video call (Zoom, Jitsi)
+
+Giao diện responsive
+
+Có thể hoạt động offline (tải tài liệu, bài giảng về máy)
+

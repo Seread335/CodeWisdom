@@ -1,205 +1,488 @@
+import { db } from "@db";
+import connectPg from "connect-pg-simple";
+import session from "express-session";
 import { 
-  User, InsertUser, users,
-  Course, InsertCourse, courses,
-  Roadmap, InsertRoadmap, roadmaps,
-  Subscription, InsertSubscription, subscriptions,
-  ContactMessage, InsertContactMessage, contactMessages
+  eq, and, desc, asc, like,
+  isNull, isNotNull, inArray, 
+} from "drizzle-orm";
+import { 
+  users, User, InsertUser,
+  courses, Course, InsertCourse,
+  lessons, Lesson, InsertLesson,
+  modules, Module, InsertModule,
+  categories, Category, InsertCategory,
+  courseCategories, CourseCategory, InsertCourseCategory,
+  instructors, Instructor, InsertInstructor,
+  learningPaths, LearningPath, InsertLearningPath,
+  pathCourses, PathCourse, InsertPathCourse,
+  enrollments, Enrollment, InsertEnrollment,
+  progress, Progress, InsertProgress,
+  reviews, Review, InsertReview
 } from "@shared/schema";
+import { pool } from "@db";
 
-// Extend the storage interface with the necessary CRUD operations
+const PostgresSessionStore = connectPg(session);
+
 export interface IStorage {
-  // User operations
+  // User management
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  
-  // Course operations
-  getAllCourses(): Promise<Course[]>;
-  getCourseById(id: number): Promise<Course | undefined>;
-  getCoursesByCategory(category: string): Promise<Course[]>;
+  updateUser(id: number, updates: Partial<User>): Promise<User | undefined>;
+
+  // Categories
+  getCategories(): Promise<Category[]>;
+  createCategory(category: InsertCategory): Promise<Category>;
+
+  // Courses
+  getCourses(options?: {
+    categoryId?: number;
+    level?: string;
+    searchQuery?: string;
+    limit?: number;
+    offset?: number;
+  }): Promise<Course[]>;
+  getCourseById(courseId: number): Promise<Course | undefined>;
+  getCoursesWithProgress(userId: number): Promise<(Course & { progress: number })[]>;
+  getRecommendedCourses(userId: number, limit?: number): Promise<Course[]>;
   createCourse(course: InsertCourse): Promise<Course>;
-  
-  // Roadmap operations
-  getAllRoadmaps(): Promise<Roadmap[]>;
-  getRoadmapById(id: number): Promise<Roadmap | undefined>;
-  getRoadmapsByCategory(category: string): Promise<Roadmap[]>;
-  createRoadmap(roadmap: InsertRoadmap): Promise<Roadmap>;
-  
-  // Subscription operations
-  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
-  
-  // Contact message operations
-  createContactMessage(message: InsertContactMessage): Promise<ContactMessage>;
+  updateCourse(id: number, updates: Partial<Course>): Promise<Course | undefined>;
+  deleteCourse(id: number): Promise<boolean>;
+
+  // Modules
+  getModulesByCourseId(courseId: number): Promise<Module[]>;
+  createModule(module: InsertModule): Promise<Module>;
+
+  // Lessons
+  getLessonById(lessonId: number): Promise<Lesson | undefined>;
+  getLessonsByCourseId(courseId: number): Promise<Lesson[]>;
+  getLessonsByModuleId(moduleId: number): Promise<Lesson[]>;
+  createLesson(lesson: InsertLesson): Promise<Lesson>;
+  updateLesson(id: number, updates: Partial<Lesson>): Promise<Lesson | undefined>;
+
+  // Learning Paths
+  getLearningPaths(): Promise<LearningPath[]>;
+  getLearningPathById(pathId: number): Promise<LearningPath | undefined>;
+  createLearningPath(path: InsertLearningPath): Promise<LearningPath>;
+
+  // Enrollments
+  enrollUserInCourse(userId: number, courseId: number): Promise<Enrollment>;
+  getUserEnrollments(userId: number): Promise<Enrollment[]>;
+  isUserEnrolledInCourse(userId: number, courseId: number): Promise<boolean>;
+
+  // Progress tracking
+  markLessonComplete(userId: number, lessonId: number): Promise<Progress>;
+  getUserProgress(userId: number, courseId?: number): Promise<Progress[]>;
+  calculateCourseProgress(userId: number, courseId: number): Promise<number>;
+
+  // Reviews
+  getCourseReviews(courseId: number): Promise<Review[]>;
+  createReview(review: InsertReview): Promise<Review>;
+
+  // Session store
+  sessionStore: any; // Use any for session store
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private courses: Map<number, Course>;
-  private roadmaps: Map<number, Roadmap>;
-  private subscriptions: Map<number, Subscription>;
-  private contactMessages: Map<number, ContactMessage>;
-  
-  private currentUserId: number;
-  private currentCourseId: number;
-  private currentRoadmapId: number;
-  private currentSubscriptionId: number;
-  private currentContactMessageId: number;
+class DatabaseStorage implements IStorage {
+  sessionStore: any;
 
   constructor() {
-    this.users = new Map();
-    this.courses = new Map();
-    this.roadmaps = new Map();
-    this.subscriptions = new Map();
-    this.contactMessages = new Map();
-    
-    this.currentUserId = 1;
-    this.currentCourseId = 1;
-    this.currentRoadmapId = 1;
-    this.currentSubscriptionId = 1;
-    this.currentContactMessageId = 1;
-    
-    // Initialize with sample data
-    this.initializeSampleData();
+    this.sessionStore = new PostgresSessionStore({ 
+      pool, 
+      createTableIfMissing: true,
+      tableName: 'session' 
+    });
   }
 
-  private initializeSampleData() {
-    // Add sample courses (from the data.ts content)
-    const sampleCourses: InsertCourse[] = [
-      {
-        title: "Lập trình Web cơ bản",
-        description: "HTML, CSS và JavaScript cho người mới bắt đầu. Tạo trang web đầu tiên từ con số 0.",
-        level: "Beginner",
-        duration: "24 giờ",
-        price: "Miễn phí",
-        image: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1169&q=80",
-        category: "beginner-courses"
-      },
-      {
-        title: "Python for Data Science",
-        description: "Phân tích dữ liệu với Python. Numpy, Pandas, Matplotlib và các thư viện phân tích dữ liệu.",
-        level: "Intermediate",
-        duration: "36 giờ",
-        price: "1,499,000 VNĐ",
-        image: "https://images.unsplash.com/photo-1555952517-2e8e729e0b44?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1064&q=80",
-        category: "ai-courses"
-      }
-    ];
-    
-    // Add sample roadmaps
-    const sampleRoadmaps: InsertRoadmap[] = [
-      {
-        title: "Lập trình viên Web",
-        description: "Lộ trình toàn diện để trở thành lập trình viên Web Frontend, Backend hoặc Fullstack.",
-        level: "Beginner",
-        category: "beginners",
-        skills: [
-          "HTML, CSS, JavaScript",
-          "React / Vue.js",
-          "Node.js / Express",
-          "SQL & NoSQL"
-        ]
-      },
-      {
-        title: "Data Science",
-        description: "Khám phá dữ liệu, xây dựng mô hình và trực quan hóa kết quả.",
-        level: "Intermediate",
-        category: "career",
-        skills: [
-          "Python cơ bản & nâng cao",
-          "Numpy, Pandas, Matplotlib",
-          "Machine Learning",
-          "SQL & Database"
-        ]
-      }
-    ];
-    
-    // Add the sample data to the maps
-    sampleCourses.forEach(course => this.createCourse(course));
-    sampleRoadmaps.forEach(roadmap => this.createRoadmap(roadmap));
-  }
-
-  // User operations
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username
-    );
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const createdAt = new Date();
-    const user: User = { ...insertUser, id, createdAt };
-    this.users.set(id, user);
-    return user;
+  async createUser(userData: InsertUser): Promise<User> {
+    const result = await db.insert(users).values(userData).returning();
+    return result[0];
   }
-  
-  // Course operations
-  async getAllCourses(): Promise<Course[]> {
-    return Array.from(this.courses.values());
+
+  async updateUser(id: number, updates: Partial<User>): Promise<User | undefined> {
+    const result = await db.update(users).set(updates).where(eq(users.id, id)).returning();
+    return result[0];
   }
-  
-  async getCourseById(id: number): Promise<Course | undefined> {
-    return this.courses.get(id);
+
+  // Categories methods
+  async getCategories(): Promise<Category[]> {
+    return await db.select().from(categories).orderBy(asc(categories.name));
   }
-  
-  async getCoursesByCategory(category: string): Promise<Course[]> {
-    return Array.from(this.courses.values()).filter(
-      course => course.category === category
+
+  async createCategory(category: InsertCategory): Promise<Category> {
+    const result = await db.insert(categories).values(category).returning();
+    return result[0];
+  }
+
+  // Courses methods
+  async getCourses(options: {
+    categoryId?: number;
+    level?: string;
+    searchQuery?: string;
+    limit?: number;
+    offset?: number;
+  } = {}): Promise<Course[]> {
+    let query = db.select().from(courses);
+
+    // Apply filters
+    const conditions = [];
+    
+    if (options.categoryId && options.categoryId !== 0) {
+      const courseIdsQuery = db.select({ courseId: courseCategories.courseId })
+        .from(courseCategories)
+        .where(eq(courseCategories.categoryId, options.categoryId));
+      
+      const courseIds = await courseIdsQuery;
+      if (courseIds.length > 0) {
+        conditions.push(inArray(courses.id, courseIds.map(c => c.courseId)));
+      } else {
+        // If no courses match the category, return empty array
+        return [];
+      }
+    }
+
+    if (options.level && options.level !== 'all') {
+      conditions.push(eq(courses.level, options.level));
+    }
+
+    if (options.searchQuery) {
+      conditions.push(
+        like(courses.title, `%${options.searchQuery}%`)
+      );
+    }
+
+    if (conditions.length > 0) {
+      query = query.where(and(...conditions));
+    }
+
+    // Apply pagination
+    if (options.limit) {
+      query = query.limit(options.limit);
+    }
+
+    if (options.offset) {
+      query = query.offset(options.offset);
+    }
+
+    query = query.orderBy(desc(courses.createdAt));
+
+    return await query;
+  }
+
+  async getCourseById(courseId: number): Promise<Course | undefined> {
+    const result = await db.select().from(courses).where(eq(courses.id, courseId)).limit(1);
+    return result[0];
+  }
+
+  async getCoursesWithProgress(userId: number): Promise<(Course & { progress: number })[]> {
+    // Get all courses the user is enrolled in
+    const enrolledCourses = await db
+      .select({
+        courseId: enrollments.courseId
+      })
+      .from(enrollments)
+      .where(eq(enrollments.userId, userId));
+
+    if (enrolledCourses.length === 0) {
+      return [];
+    }
+
+    const courseIds = enrolledCourses.map(e => e.courseId);
+    
+    // Get all courses data
+    const coursesData = await db
+      .select()
+      .from(courses)
+      .where(inArray(courses.id, courseIds));
+
+    // For each course, calculate progress
+    const coursesWithProgress = await Promise.all(
+      coursesData.map(async (course) => {
+        const progress = await this.calculateCourseProgress(userId, course.id);
+        return { ...course, progress };
+      })
     );
+
+    return coursesWithProgress;
   }
-  
-  async createCourse(insertCourse: InsertCourse): Promise<Course> {
-    const id = this.currentCourseId++;
-    const createdAt = new Date();
-    const course: Course = { ...insertCourse, id, createdAt };
-    this.courses.set(id, course);
-    return course;
+
+  async getRecommendedCourses(userId: number, limit: number = 8): Promise<Course[]> {
+    // In a real implementation, this would contain recommendation logic
+    // For now, just return courses the user hasn't enrolled in yet
+    
+    // Get all courses the user is already enrolled in
+    const enrolledCourses = await db
+      .select({
+        courseId: enrollments.courseId
+      })
+      .from(enrollments)
+      .where(eq(enrollments.userId, userId));
+
+    const enrolledCourseIds = enrolledCourses.map(e => e.courseId);
+    
+    // Get courses the user is not enrolled in
+    let query = db.select().from(courses);
+    
+    if (enrolledCourseIds.length > 0) {
+      // Sử dụng SQL.raw để tạo điều kiện NOT IN thay vì dùng inArray().not() phương thức đã bị lỗi
+      query = query.where(
+        and(
+          isNotNull(courses.id),
+          notInArray(courses.id, enrolledCourseIds)
+        )
+      );
+    }
+    
+    query = query.limit(limit).orderBy(desc(courses.createdAt));
+    
+    return await query;
   }
-  
-  // Roadmap operations
-  async getAllRoadmaps(): Promise<Roadmap[]> {
-    return Array.from(this.roadmaps.values());
+
+  async createCourse(course: InsertCourse): Promise<Course> {
+    const result = await db.insert(courses).values(course).returning();
+    return result[0];
   }
-  
-  async getRoadmapById(id: number): Promise<Roadmap | undefined> {
-    return this.roadmaps.get(id);
+
+  async updateCourse(id: number, updates: Partial<Course>): Promise<Course | undefined> {
+    const result = await db.update(courses).set(updates).where(eq(courses.id, id)).returning();
+    return result[0];
   }
-  
-  async getRoadmapsByCategory(category: string): Promise<Roadmap[]> {
-    return Array.from(this.roadmaps.values()).filter(
-      roadmap => roadmap.category === category
-    );
+
+  async deleteCourse(id: number): Promise<boolean> {
+    const result = await db.delete(courses).where(eq(courses.id, id)).returning({ id: courses.id });
+    return result.length > 0;
   }
-  
-  async createRoadmap(insertRoadmap: InsertRoadmap): Promise<Roadmap> {
-    const id = this.currentRoadmapId++;
-    const createdAt = new Date();
-    const roadmap: Roadmap = { ...insertRoadmap, id, createdAt };
-    this.roadmaps.set(id, roadmap);
-    return roadmap;
+
+  // Modules methods
+  async getModulesByCourseId(courseId: number): Promise<Module[]> {
+    return await db
+      .select()
+      .from(modules)
+      .where(eq(modules.courseId, courseId))
+      .orderBy(asc(modules.order));
   }
-  
-  // Subscription operations
-  async createSubscription(insertSubscription: InsertSubscription): Promise<Subscription> {
-    const id = this.currentSubscriptionId++;
-    const createdAt = new Date();
-    const subscription: Subscription = { ...insertSubscription, id, createdAt };
-    this.subscriptions.set(id, subscription);
-    return subscription;
+
+  async createModule(module: InsertModule): Promise<Module> {
+    const result = await db.insert(modules).values(module).returning();
+    return result[0];
   }
-  
-  // Contact message operations
-  async createContactMessage(insertMessage: InsertContactMessage): Promise<ContactMessage> {
-    const id = this.currentContactMessageId++;
-    const createdAt = new Date();
-    const message: ContactMessage = { ...insertMessage, id, createdAt };
-    this.contactMessages.set(id, message);
-    return message;
+
+  // Lessons methods
+  async getLessonById(lessonId: number): Promise<Lesson | undefined> {
+    const result = await db.select().from(lessons).where(eq(lessons.id, lessonId)).limit(1);
+    return result[0];
+  }
+
+  async getLessonsByCourseId(courseId: number): Promise<Lesson[]> {
+    const courseModules = await this.getModulesByCourseId(courseId);
+    if (courseModules.length === 0) return [];
+
+    const moduleIds = courseModules.map(m => m.id);
+    
+    return await db
+      .select()
+      .from(lessons)
+      .where(inArray(lessons.moduleId, moduleIds))
+      .orderBy(asc(lessons.moduleId), asc(lessons.order));
+  }
+
+  async getLessonsByModuleId(moduleId: number): Promise<Lesson[]> {
+    return await db
+      .select()
+      .from(lessons)
+      .where(eq(lessons.moduleId, moduleId))
+      .orderBy(asc(lessons.order));
+  }
+
+  async createLesson(lesson: InsertLesson): Promise<Lesson> {
+    const result = await db.insert(lessons).values(lesson).returning();
+    return result[0];
+  }
+
+  async updateLesson(id: number, updates: Partial<Lesson>): Promise<Lesson | undefined> {
+    const result = await db.update(lessons).set(updates).where(eq(lessons.id, id)).returning();
+    return result[0];
+  }
+
+  // Learning Paths methods
+  async getLearningPaths(): Promise<LearningPath[]> {
+    return await db.select().from(learningPaths).orderBy(asc(learningPaths.order));
+  }
+
+  async getLearningPathById(pathId: number): Promise<LearningPath | undefined> {
+    const result = await db.select().from(learningPaths).where(eq(learningPaths.id, pathId)).limit(1);
+    return result[0];
+  }
+
+  async createLearningPath(path: InsertLearningPath): Promise<LearningPath> {
+    const result = await db.insert(learningPaths).values(path).returning();
+    return result[0];
+  }
+
+  // Enrollments methods
+  async enrollUserInCourse(userId: number, courseId: number): Promise<Enrollment> {
+    // Check if already enrolled
+    const existing = await db
+      .select()
+      .from(enrollments)
+      .where(
+        and(
+          eq(enrollments.userId, userId),
+          eq(enrollments.courseId, courseId)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    const result = await db
+      .insert(enrollments)
+      .values({
+        userId,
+        courseId,
+        enrolledAt: new Date()
+      })
+      .returning();
+
+    return result[0];
+  }
+
+  async getUserEnrollments(userId: number): Promise<Enrollment[]> {
+    return await db
+      .select()
+      .from(enrollments)
+      .where(eq(enrollments.userId, userId))
+      .orderBy(desc(enrollments.enrolledAt));
+  }
+
+  async isUserEnrolledInCourse(userId: number, courseId: number): Promise<boolean> {
+    try {
+      const result = await db
+        .select()
+        .from(enrollments)
+        .where(
+          and(
+            eq(enrollments.userId, userId),
+            eq(enrollments.courseId, courseId)
+          )
+        );
+
+      return result && result.length > 0;
+    } catch (error) {
+      console.error('Error checking enrollment:', error);
+      return false;
+    }
+  }
+
+  // Progress tracking methods
+  async markLessonComplete(userId: number, lessonId: number): Promise<Progress> {
+    // Get the lesson to find its course
+    const lessonData = await this.getLessonById(lessonId);
+    if (!lessonData) {
+      throw new Error("Lesson not found");
+    }
+
+    // Get the module to find its course
+    const moduleData = await db
+      .select()
+      .from(modules)
+      .where(eq(modules.id, lessonData.moduleId))
+      .limit(1);
+      
+    if (moduleData.length === 0) {
+      throw new Error("Module not found");
+    }
+
+    const courseId = moduleData[0].courseId;
+
+    // Check if progress already exists
+    const existing = await db
+      .select()
+      .from(progress)
+      .where(
+        and(
+          eq(progress.userId, userId),
+          eq(progress.lessonId, lessonId)
+        )
+      )
+      .limit(1);
+
+    if (existing.length > 0) {
+      return existing[0];
+    }
+
+    // Create new progress record
+    const result = await db
+      .insert(progress)
+      .values({
+        userId,
+        lessonId,
+        courseId,
+        completedAt: new Date(),
+        status: "completed"
+      })
+      .returning();
+
+    return result[0];
+  }
+
+  async getUserProgress(userId: number, courseId?: number): Promise<Progress[]> {
+    let query = db.select().from(progress).where(eq(progress.userId, userId));
+    
+    if (courseId) {
+      query = query.where(eq(progress.courseId, courseId));
+    }
+    
+    return await query.orderBy(desc(progress.completedAt));
+  }
+
+  async calculateCourseProgress(userId: number, courseId: number): Promise<number> {
+    // Get total number of lessons for the course
+    const allLessons = await this.getLessonsByCourseId(courseId);
+    if (allLessons.length === 0) return 0;
+
+    // Get completed lessons for this user and course
+    const completedLessons = await db
+      .select()
+      .from(progress)
+      .where(
+        and(
+          eq(progress.userId, userId),
+          eq(progress.courseId, courseId),
+          eq(progress.status, "completed")
+        )
+      );
+
+    // Calculate percentage
+    return Math.round((completedLessons.length / allLessons.length) * 100);
+  }
+
+  // Reviews methods
+  async getCourseReviews(courseId: number): Promise<Review[]> {
+    return await db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.courseId, courseId))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async createReview(review: InsertReview): Promise<Review> {
+    const result = await db.insert(reviews).values(review).returning();
+    return result[0];
   }
 }
 
-export const storage = new MemStorage();
+export const storage: IStorage = new DatabaseStorage();

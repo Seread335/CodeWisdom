@@ -2,24 +2,32 @@ import { Switch, Route } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
-import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
-import Home from "@/pages/Home";
-import Courses from "@/pages/Courses";
-import Roadmap from "@/pages/Roadmap";
-import Team from "@/pages/Team";
-import Contact from "@/pages/Contact";
+import HomePage from "@/pages/home-page";
+import AuthPage from "@/pages/auth-page";
+import CoursesPage from "@/pages/courses-page";
+import CourseDetailsPage from "@/pages/course-details-page";
+import LessonPage from "@/pages/lesson-page";
+import AboutPage from "@/pages/about-page";
+import RoadmapPage from "@/pages/roadmap-page";
+import SpecializationPage from "@/pages/specialization-page";
+import SettingsPage from "@/pages/settings-page";
+import CategoryPage from "@/pages/category-page";
+import { ProtectedRoute } from "./lib/protected-route";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Home} />
-      <Route path="/courses" component={Courses} />
-      <Route path="/roadmap" component={Roadmap} />
-      <Route path="/team" component={Team} />
-      <Route path="/contact" component={Contact} />
+      <Route path="/auth" component={AuthPage} />
+      <ProtectedRoute path="/" component={HomePage} />
+      <ProtectedRoute path="/about" component={AboutPage} />
+      <ProtectedRoute path="/roadmap" component={RoadmapPage} />
+      <ProtectedRoute path="/specialization" component={SpecializationPage} />
+      <ProtectedRoute path="/courses" component={CoursesPage} />
+      <ProtectedRoute path="/courses/:id" component={CourseDetailsPage} />
+      <ProtectedRoute path="/lessons/:id" component={LessonPage} />
+      <ProtectedRoute path="/settings" component={SettingsPage} />
+      <ProtectedRoute path="/categories/:category" component={CategoryPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -28,16 +36,8 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <div className="flex flex-col min-h-screen">
-          <Navbar />
-          <main className="flex-grow">
-            <Router />
-          </main>
-          <Footer />
-        </div>
-      </TooltipProvider>
+      <Router />
+      <Toaster />
     </QueryClientProvider>
   );
 }
