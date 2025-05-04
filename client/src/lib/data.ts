@@ -3,66 +3,24 @@ export const teamData = [
   {
     name: "Huỳnh Thái Bảo",
     role: "Founder & Lead Developer",
-    description: "Chuyên gia phát triển phần mềm với hơn 5 năm kinh nghiệm trong lĩnh vực Web Development và Cloud Computing.",
-    image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1170&q=80",
+    description: "Sinh ngày 25/10/2009, học tại trường THCS & THPT Mỹ Thuận, sinh sống tại Bình Tân Vĩnh Long.",
+    image: "https://cdn.pixabay.com/photo/2019/11/07/19/20/atom-4609358_960_720.png",
     socials: {
       linkedin: "#",
       github: "#",
       facebook: "#"
     },
     borderColor: "primary"
-  },
-  {
-    name: "Nguyễn Minh Anh",
-    role: "AI & ML Instructor",
-    description: "Tiến sĩ ngành AI với hơn 10 năm kinh nghiệm nghiên cứu và giảng dạy tại các trường đại học hàng đầu.",
-    image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=761&q=80",
-    socials: {
-      linkedin: "#",
-      github: "#",
-      twitter: "#"
-    },
-    borderColor: "secondary"
-  },
-  {
-    name: "Trần Văn Bình",
-    role: "Backend & DevOps Specialist",
-    description: "Senior DevOps Engineer với kinh nghiệm triển khai hệ thống cho nhiều doanh nghiệp lớn trong và ngoài nước.",
-    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80",
-    socials: {
-      linkedin: "#",
-      github: "#",
-      medium: "#"
-    },
-    borderColor: "accent"
   }
 ];
 
 // Extended Team Data for Team page
 export const extendedTeamData = [
   {
-    name: "Lê Thị Hương",
-    role: "Frontend Specialist",
-    description: "Chuyên gia React & UI/UX",
-    image: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-  },
-  {
-    name: "Phạm Minh Tuấn",
-    role: "Mobile Developer",
-    description: "Chuyên gia Flutter & React Native",
-    image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-  },
-  {
-    name: "Nguyễn Thị Mai",
-    role: "Database Expert",
-    description: "Chuyên gia SQL & NoSQL",
-    image: "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
-  },
-  {
-    name: "Vũ Quang Huy",
-    role: "Cybersecurity Instructor",
-    description: "Chuyên gia bảo mật",
-    image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+    name: "Huỳnh Thái Bảo",
+    role: "Founder & Lead Developer",
+    description: "Sinh ngày 25/10/2009, học tại trường THCS & THPT Mỹ Thuận, sinh sống tại Bình Tân Vĩnh Long.",
+    image: "https://cdn.pixabay.com/photo/2019/11/07/19/20/atom-4609358_960_720.png"
   }
 ];
 
